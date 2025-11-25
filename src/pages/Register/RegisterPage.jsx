@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Country, State, City } from "country-state-city"; // ⭐ ADDED
 
 const steps = [
   "Profile For",
@@ -289,58 +290,106 @@ function ProfileFor({ value, onChange }) {
   return (
     <div className="w-full">
       {/* QUESTION */}
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">
         Who are you creating this profile for?
       </h2>
+      <p className="text-xs text-gray-500 mb-3">
+        Select one option from the list below.
+      </p>
 
-      {/* ANSWER BUTTONS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {options.map((o) => (
-          <button
-            key={o}
-            onClick={() => {
-              setSelected(o);
-              onChange && onChange(o);
-            }}
-            className={`px-4 py-3 rounded-xl border text-sm transition-all
-              ${
-                selected === o
-                  ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md scale-[1.02]"
-                  : "border-gray-300 text-gray-800 bg-white"
-              }
-            `}
-          >
-            {o}
-          </button>
-        ))}
+      {/* SIMPLE LIST STYLE (NO CARD / NO PILLS) */}
+      <div className="mt-1 border border-gray-200 rounded-lg divide-y bg-white">
+        {options.map((o) => {
+          const active = selected === o;
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => {
+                setSelected(o);
+                onChange && onChange(o);
+              }}
+              className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors
+                ${active ? "bg-pink-50" : "bg-white hover:bg-gray-50"}`}
+            >
+              <span className="text-gray-800">{o}</span>
+
+              {/* custom radio indicator */}
+              <span
+                className={`inline-flex h-4 w-4 items-center justify-center rounded-full border 
+                  ${
+                    active
+                      ? "border-pink-500 bg-pink-500"
+                      : "border-gray-300 bg-white"
+                  }`}
+              >
+                {active && (
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
+
 function Gender() {
   const [gender, setGender] = useState("");
 
+  const options = [
+    { value: "Male", label: "Male", hint: "Creating a groom profile" },
+    { value: "Female", label: "Female", hint: "Creating a bride profile" },
+  ];
+
   return (
     <div className="w-full">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      {/* TITLE */}
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">
         Select Gender
       </h2>
+      <p className="text-xs text-gray-500 mb-4">
+        Choose the gender of the person this profile is for.
+      </p>
 
-      <select
-        value={gender}
-        onChange={(e) => setGender(e.target.value)}
-        className="w-full p-3 border rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-pink-500 outline-none"
-      >
-        <option value="" disabled>
-          Choose gender
-        </option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
+      {/* CARD STYLE BUTTONS */}
+      <div className="grid grid-cols-2 gap-3">
+        {options.map((opt) => {
+          const isActive = gender === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setGender(opt.value)}
+              className={`text-left px-4 py-3 rounded-2xl border text-sm transition-all
+                bg-white hover:bg-pink-50 hover:-translate-y-[1px] shadow-sm
+                ${
+                  isActive
+                    ? "border-pink-500 ring-2 ring-pink-100"
+                    : "border-gray-200"
+                }`}
+            >
+              <div className="font-semibold text-gray-900">{opt.label}</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">
+                {opt.hint}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {gender && (
+        <p className="text-xs text-gray-500 mt-3">
+          Selected:{" "}
+          <span className="font-medium text-pink-600">{gender}</span>
+        </p>
+      )}
     </div>
   );
 }
+
 
 function PhoneVerify() {
   return (
@@ -751,14 +800,14 @@ function HeightandWeight() {
   );
 }
 
-/* ==== UPDATED FROM() WITH API-BASED DROPDOWNS + lift to parent ==== */
+/* ==== NEW FROM() USING country-state-city (searchable) ==== */
 
 function From({ onLocationChange }) {
   const [countries, setCountries] = useState([]);
 
-  const [country, setCountry] = useState("");
-  const [state, setState] = useState("");
-  const [city, setCity] = useState("");
+  const [countryCode, setCountryCode] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  const [cityName, setCityName] = useState("");
 
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -767,61 +816,51 @@ function From({ onLocationChange }) {
   const [searchState, setSearchState] = useState("");
   const [searchCity, setSearchCity] = useState("");
 
-  const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
-
-  // FETCH COUNTRIES
-  const fetchCountries = () => {
-    axios
-      .get("https://countriesnow.space/api/v0.1/countries")
-      .then((res) => setCountries(res.data.data || []))
-      .catch((err) => console.log("Country Fetch Error:", err));
-  };
-
-  // FETCH STATES FOR COUNTRY
-  const fetchStatesForCountry = (selectedCountry) => {
-    setLoadingStates(true);
-    setStates([]);
-    setCities([]);
-
-    axios
-      .post("https://countriesnow.space/api/v0.1/countries/states", {
-        country: selectedCountry,
-      })
-      .then((res) => {
-        setStates(res.data?.data?.states || []);
-      })
-      .catch((err) => console.log("State Fetch Error:", err))
-      .finally(() => setLoadingStates(false));
-  };
-
-  // FETCH CITIES FOR STATE
-  const fetchCitiesForState = (selectedCountry, selectedState) => {
-    setLoadingCities(true);
-    setCities([]);
-
-    axios
-      .post("https://countriesnow.space/api/v0.1/countries/state/cities", {
-        country: selectedCountry,
-        state: selectedState,
-      })
-      .then((res) => {
-        setCities(res.data?.data || []);
-      })
-      .catch((err) => console.log("City Fetch Error:", err))
-      .finally(() => setLoadingCities(false));
-  };
-
   useEffect(() => {
-    fetchCountries();
+    const all = Country.getAllCountries();
+    setCountries(all);
   }, []);
 
-  // 🔹 whenever location changes, inform parent
   useEffect(() => {
-    if (onLocationChange) {
-      onLocationChange({ country, state, city });
-    }
-  }, [country, state, city, onLocationChange]);
+    if (!onLocationChange) return;
+
+    const selectedCountry = countries.find((c) => c.isoCode === countryCode);
+    const selectedState = states.find((s) => s.isoCode === stateCode);
+
+    onLocationChange({
+      country: selectedCountry?.name || "",
+      state: selectedState?.name || "",
+      city: cityName || "",
+    });
+  }, [countryCode, stateCode, cityName, countries, states, onLocationChange]);
+
+  const handleCountrySelect = (code) => {
+    setCountryCode(code);
+    setStateCode("");
+    setCityName("");
+    setSearchCountry("");
+
+    const st = State.getStatesOfCountry(code) || [];
+    setStates(st);
+    setCities([]);
+    setSearchState("");
+    setSearchCity("");
+  };
+
+  const handleStateSelect = (code) => {
+    setStateCode(code);
+    setCityName("");
+    setSearchState("");
+
+    const ct = City.getCitiesOfState(countryCode, code) || [];
+    setCities(ct);
+    setSearchCity("");
+  };
+
+  const selectedCountryName =
+    countries.find((c) => c.isoCode === countryCode)?.name || "";
+  const selectedStateName =
+    states.find((s) => s.isoCode === stateCode)?.name || "";
 
   return (
     <div className="w-full">
@@ -836,63 +875,62 @@ function From({ onLocationChange }) {
         <input
           className="w-full border rounded-xl p-3"
           placeholder="Search country..."
-          value={country || searchCountry}
+          value={selectedCountryName || searchCountry}
           onChange={(e) => {
-            setCountry("");
-            setState("");
-            setCity("");
+            setCountryCode("");
+            setStateCode("");
+            setCityName("");
+            setStates([]);
+            setCities([]);
             setSearchCountry(e.target.value);
           }}
         />
 
-        {!country && (
+        {!countryCode && (
           <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
             {countries
               .filter((c) =>
-                c.country.toLowerCase().includes(searchCountry.toLowerCase())
+                c.name.toLowerCase().includes(searchCountry.toLowerCase())
               )
               .map((c) => (
                 <div
-                  key={c.country}
-                  onClick={() => {
-                    setCountry(c.country);
-                    setSearchCountry("");
-                    setState("");
-                    setCity("");
-                    fetchStatesForCountry(c.country);
-                  }}
+                  key={c.isoCode}
+                  onClick={() => handleCountrySelect(c.isoCode)}
                   className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
                 >
-                  {c.country}
+                  {c.name}
                 </div>
               ))}
 
             {countries.filter((c) =>
-              c.country.toLowerCase().includes(searchCountry.toLowerCase())
+              c.name.toLowerCase().includes(searchCountry.toLowerCase())
             ).length === 0 && (
-              <div className="p-3 text-gray-500 text-sm">No country found</div>
+              <div className="p-3 text-gray-500 text-sm">
+                No country found
+              </div>
             )}
           </div>
         )}
       </div>
 
       {/* STATE */}
-      {country && (
+      {countryCode && (
         <div className="mb-6">
           <p className="text-sm font-medium text-gray-700 mb-2">State</p>
 
           <input
             className="w-full border rounded-xl p-3"
-            placeholder={loadingStates ? "Loading states..." : "Search state..."}
-            value={state || searchState}
+            placeholder="Search state..."
+            value={selectedStateName || searchState}
             onChange={(e) => {
-              setState("");
-              setCity("");
+              setStateCode("");
+              setCityName("");
+              setCities([]);
               setSearchState(e.target.value);
             }}
           />
 
-          {!state && (
+          {!stateCode && (
             <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
               {states
                 .filter((st) =>
@@ -900,21 +938,18 @@ function From({ onLocationChange }) {
                 )
                 .map((st) => (
                   <div
-                    key={st.name}
-                    onClick={() => {
-                      setState(st.name);
-                      setSearchState("");
-                      setCity("");
-                      fetchCitiesForState(country, st.name);
-                    }}
+                    key={st.isoCode}
+                    onClick={() => handleStateSelect(st.isoCode)}
                     className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
                   >
                     {st.name}
                   </div>
                 ))}
 
-              {!loadingStates && states.length === 0 && (
-                <div className="p-3 text-gray-500 text-sm">No states found</div>
+              {states.length === 0 && (
+                <div className="p-3 text-gray-500 text-sm">
+                  No states found
+                </div>
               )}
             </div>
           )}
@@ -922,41 +957,43 @@ function From({ onLocationChange }) {
       )}
 
       {/* CITY */}
-      {state && (
+      {stateCode && (
         <div className="mb-6">
           <p className="text-sm font-medium text-gray-700 mb-2">City</p>
 
           <input
             className="w-full border rounded-xl p-3"
-            placeholder={loadingCities ? "Loading cities..." : "Search city..."}
-            value={city || searchCity}
+            placeholder="Search city..."
+            value={cityName || searchCity}
             onChange={(e) => {
-              setCity("");
+              setCityName("");
               setSearchCity(e.target.value);
             }}
           />
 
-          {!city && (
+          {!cityName && (
             <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
               {cities
                 .filter((ct) =>
-                  ct.toLowerCase().includes(searchCity.toLowerCase())
+                  ct.name.toLowerCase().includes(searchCity.toLowerCase())
                 )
                 .map((ct) => (
                   <div
-                    key={ct}
+                    key={ct.name}
                     onClick={() => {
-                      setCity(ct);
+                      setCityName(ct.name);
                       setSearchCity("");
                     }}
                     className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
                   >
-                    {ct}
+                    {ct.name}
                   </div>
                 ))}
 
-              {!loadingCities && cities.length === 0 && (
-                <div className="p-3 text-gray-500 text-sm">No cities found</div>
+              {cities.length === 0 && (
+                <div className="p-3 text-gray-500 text-sm">
+                  No cities found
+                </div>
               )}
             </div>
           )}
@@ -2640,9 +2677,6 @@ function GuardianSection({
   );
 }
 
-
-
-
 /* ==== NEW: SIBLING DETAILS STEP ==== */
 
 function SiblingDetails() {
@@ -2709,18 +2743,17 @@ function SiblingDetails() {
   );
 }
 
-/* ==== PARTNER DETAILS: WITH COUNTRY → STATE → CITY LIKE FROM() + lift to parent ==== */
+/* ==== UPDATED PARTNER DETAILS USING country-state-city ==== */
 
 function PartnerDetails({ onPartnerChange }) {
   const [relation, setRelation] = useState("man-woman");
   const [minAge, setMinAge] = useState(52);
   const [maxAge, setMaxAge] = useState(55);
 
-  // location preference states (same style as From)
   const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState("");
-  const [state, setState] = useState("");
-  const [city, setCity] = useState("");
+  const [countryCode, setCountryCode] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  const [cityName, setCityName] = useState("");
 
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -2729,61 +2762,56 @@ function PartnerDetails({ onPartnerChange }) {
   const [searchState, setSearchState] = useState("");
   const [searchCity, setSearchCity] = useState("");
 
-  const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
-
   const ageOptions = Array.from({ length: 63 }, (_, i) => 18 + i); // 18–80
 
-  // fetch countries once
   useEffect(() => {
-    axios
-      .get("https://countriesnow.space/api/v0.1/countries")
-      .then((res) => setCountries(res.data.data || []))
-      .catch((err) => console.log("Partner Country Fetch Error:", err));
+    setCountries(Country.getAllCountries());
   }, []);
 
-  const fetchStatesForCountry = (selectedCountry) => {
-    setLoadingStates(true);
-    setStates([]);
-    setCities([]);
-
-    axios
-      .post("https://countriesnow.space/api/v0.1/countries/states", {
-        country: selectedCountry,
-      })
-      .then((res) => {
-        setStates(res.data?.data?.states || []);
-      })
-      .catch((err) => console.log("Partner State Fetch Error:", err))
-      .finally(() => setLoadingStates(false));
-  };
-
-  const fetchCitiesForState = (selectedCountry, selectedState) => {
-    setLoadingCities(true);
-    setCities([]);
-
-    axios
-      .post("https://countriesnow.space/api/v0.1/countries/state/cities", {
-        country: selectedCountry,
-        state: selectedState,
-      })
-      .then((res) => {
-        setCities(res.data?.data || []);
-      })
-      .catch((err) => console.log("Partner City Fetch Error:", err))
-      .finally(() => setLoadingCities(false));
-  };
-
-  // 🔹 Sync to parent
   useEffect(() => {
     if (!onPartnerChange) return;
-    const locParts = [country, state, city].filter(Boolean);
+
+    const countryName =
+      countries.find((c) => c.isoCode === countryCode)?.name || "";
+    const stateName =
+      states.find((s) => s.isoCode === stateCode)?.name || "";
+
+    const locParts = [countryName, stateName, cityName].filter(Boolean);
+
     onPartnerChange({
       minAge,
       maxAge,
       location: locParts.join(", "),
     });
-  }, [minAge, maxAge, country, state, city, onPartnerChange]);
+  }, [minAge, maxAge, countryCode, stateCode, cityName, countries, states, onPartnerChange]);
+
+  const selectedCountryName =
+    countries.find((c) => c.isoCode === countryCode)?.name || "";
+  const selectedStateName =
+    states.find((s) => s.isoCode === stateCode)?.name || "";
+
+  const handleCountrySelect = (code) => {
+    setCountryCode(code);
+    setStateCode("");
+    setCityName("");
+    setSearchCountry("");
+
+    const st = State.getStatesOfCountry(code) || [];
+    setStates(st);
+    setCities([]);
+    setSearchState("");
+    setSearchCity("");
+  };
+
+  const handleStateSelect = (code) => {
+    setStateCode(code);
+    setCityName("");
+    setSearchState("");
+
+    const ct = City.getCitiesOfState(countryCode, code) || [];
+    setCities(ct);
+    setSearchCity("");
+  };
 
   return (
     <div className="w-full flex justify-center mt-10 animate-slideIn">
@@ -2797,9 +2825,21 @@ function PartnerDetails({ onPartnerChange }) {
           <span className="text-xl font-bold text-gray-800">Partner</span>
         </div>
 
-        {/* (Relation dropdown optional) */}
+        {/* (Relation dropdown optional – kept for future) */}
+        <div className="mb-4 text-xs text-gray-600">
+          <span>Looking for </span>
+          <select
+            value={relation}
+            onChange={(e) => setRelation(e.target.value)}
+            className="border border-gray-300 rounded-md px-2 py-1 text-xs bg-white ml-1"
+          >
+            <option value="man-woman">Woman for a Man</option>
+            <option value="woman-man">Man for a Woman</option>
+            <option value="any">Any</option>
+          </select>
+        </div>
 
-        {/* ROW 2 – AGE RANGE */}
+        {/* AGE RANGE */}
         <div className="mb-4 text-sm text-gray-700">
           <div className="flex items-center justify-between gap-2">
             <span>Between ages</span>
@@ -2848,41 +2888,35 @@ function PartnerDetails({ onPartnerChange }) {
             <input
               className="w-full border rounded-xl px-3 py-2.5 text-sm"
               placeholder="Search country..."
-              value={country || searchCountry}
+              value={selectedCountryName || searchCountry}
               onChange={(e) => {
-                setCountry("");
-                setState("");
-                setCity("");
+                setCountryCode("");
+                setStateCode("");
+                setCityName("");
+                setStates([]);
+                setCities([]);
                 setSearchCountry(e.target.value);
               }}
             />
 
-            {!country && (
+            {!countryCode && (
               <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow text-sm">
                 {countries
                   .filter((c) =>
-                    c.country
-                      .toLowerCase()
-                      .includes(searchCountry.toLowerCase())
+                    c.name.toLowerCase().includes(searchCountry.toLowerCase())
                   )
                   .map((c) => (
                     <div
-                      key={c.country}
-                      onClick={() => {
-                        setCountry(c.country);
-                        setSearchCountry("");
-                        setState("");
-                        setCity("");
-                        fetchStatesForCountry(c.country);
-                      }}
+                      key={c.isoCode}
+                      onClick={() => handleCountrySelect(c.isoCode)}
                       className="px-3 py-2 cursor-pointer hover:bg-gray-100"
                     >
-                      {c.country}
+                      {c.name}
                     </div>
                   ))}
 
                 {countries.filter((c) =>
-                  c.country.toLowerCase().includes(searchCountry.toLowerCase())
+                  c.name.toLowerCase().includes(searchCountry.toLowerCase())
                 ).length === 0 && (
                   <div className="px-3 py-2 text-gray-500">
                     No country found
@@ -2893,25 +2927,24 @@ function PartnerDetails({ onPartnerChange }) {
           </div>
 
           {/* STATE */}
-          {country && (
+          {countryCode && (
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">
                 Preferred State
               </p>
               <input
                 className="w-full border rounded-xl px-3 py-2.5 text-sm"
-                placeholder={
-                  loadingStates ? "Loading states..." : "Search state..."
-                }
-                value={state || searchState}
+                placeholder="Search state..."
+                value={selectedStateName || searchState}
                 onChange={(e) => {
-                  setState("");
-                  setCity("");
+                  setStateCode("");
+                  setCityName("");
+                  setCities([]);
                   setSearchState(e.target.value);
                 }}
               />
 
-              {!state && (
+              {!stateCode && (
                 <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow text-sm">
                   {states
                     .filter((st) =>
@@ -2919,20 +2952,15 @@ function PartnerDetails({ onPartnerChange }) {
                     )
                     .map((st) => (
                       <div
-                        key={st.name}
-                        onClick={() => {
-                          setState(st.name);
-                          setSearchState("");
-                          setCity("");
-                          fetchCitiesForState(country, st.name);
-                        }}
+                        key={st.isoCode}
+                        onClick={() => handleStateSelect(st.isoCode)}
                         className="px-3 py-2 cursor-pointer hover:bg-gray-100"
                       >
                         {st.name}
                       </div>
                     ))}
 
-                  {!loadingStates && states.length === 0 && (
+                  {states.length === 0 && (
                     <div className="px-3 py-2 text-gray-500">
                       No states found
                     </div>
@@ -2943,43 +2971,41 @@ function PartnerDetails({ onPartnerChange }) {
           )}
 
           {/* CITY */}
-          {state && (
+          {stateCode && (
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">
                 Preferred City
               </p>
               <input
                 className="w-full border rounded-xl px-3 py-2.5 text-sm"
-                placeholder={
-                  loadingCities ? "Loading cities..." : "Search city..."
-                }
-                value={city || searchCity}
+                placeholder="Search city..."
+                value={cityName || searchCity}
                 onChange={(e) => {
-                  setCity("");
+                  setCityName("");
                   setSearchCity(e.target.value);
                 }}
               />
 
-              {!city && (
+              {!cityName && (
                 <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow text-sm">
                   {cities
                     .filter((ct) =>
-                      ct.toLowerCase().includes(searchCity.toLowerCase())
+                      ct.name.toLowerCase().includes(searchCity.toLowerCase())
                     )
                     .map((ct) => (
                       <div
-                        key={ct}
+                        key={ct.name}
                         onClick={() => {
-                          setCity(ct);
+                          setCityName(ct.name);
                           setSearchCity("");
                         }}
                         className="px-3 py-2 cursor-pointer hover:bg-gray-100"
                       >
-                        {ct}
+                        {ct.name}
                       </div>
                     ))}
 
-                  {!loadingCities && cities.length === 0 && (
+                  {cities.length === 0 && (
                     <div className="px-3 py-2 text-gray-500">
                       No cities found
                     </div>

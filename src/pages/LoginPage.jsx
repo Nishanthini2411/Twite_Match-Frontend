@@ -12,10 +12,12 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: username + password validate pannalaam (API call)
     setShowOTP(true);
   };
 
   const handleOTPSubmit = () => {
+    // TODO: OTP verify success aa irundha
     navigate("/app/home");
   };
 
@@ -84,13 +86,12 @@ export default function LoginPage() {
               Remember Me
             </label>
 
-          <Link
-  to="/forgot-password"
-  className="cursor-pointer hover:underline text-white/90"
->
-  Forgot Password?
-</Link>
-
+            <Link
+              to="/forgot-password"
+              className="cursor-pointer hover:underline text-white/90"
+            >
+              Forgot Password?
+            </Link>
           </div>
 
           {/* LOGIN BUTTON */}
@@ -101,6 +102,19 @@ export default function LoginPage() {
           >
             Log In
           </button>
+
+          {/* 🔥 NEW – CREATE ACCOUNT CTA */}
+          <div className="mt-3 flex flex-col items-center gap-2 text-xs">
+            <span className="text-white/80">New user?</span>
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+              className="w-full py-2 border border-white/60 text-white rounded-md 
+              bg-transparent hover:bg-white/15 transition font-semibold text-xs"
+            >
+              Create a New Account
+            </button>
+          </div>
         </form>
 
         {/* FOOTER */}
@@ -109,7 +123,7 @@ export default function LoginPage() {
         </p>
       </motion.div>
 
-      {/* OTP POPUP UI (MATCHED THEME) */}
+      {/* OTP POPUP UI */}
       <AnimatePresence>
         {showOTP && (
           <motion.div
@@ -169,7 +183,7 @@ export default function LoginPage() {
 
               {/* Resend */}
               <p className="text-center text-white/80 text-xs mt-4">
-                Didn't receive the OTP?{" "}
+                Didn&apos;t receive the OTP?{" "}
                 <span className="text-pink-300 cursor-pointer hover:underline">
                   Resend
                 </span>

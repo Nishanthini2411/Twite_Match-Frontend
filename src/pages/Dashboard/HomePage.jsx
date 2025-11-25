@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Crown,
@@ -61,6 +62,7 @@ const recommended = [
 export default function HomePage() {
   const profile = useSelector((state) => state.profile);
   const premium = useSelector((state) => state.premium);
+  const navigate = useNavigate();
 
   const completion = Number(profile?.completion || 0);
   const isPremium = Boolean(premium?.isPremium);
@@ -69,10 +71,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-
       {/* TOP ROW: PROFILE COMPLETION + PREMIUM STATUS */}
       <section className="grid lg:grid-cols-[2.1fr,1.2fr] gap-6">
-
         {/* PROFILE COMPLETION CARD */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -83,7 +83,6 @@ export default function HomePage() {
           {/* soft gradient background */}
           <div className="absolute inset-0 pointer-events-none opacity-70 bg-[radial-gradient(circle_at_top,_#ffe4f0,_transparent_55%),radial-gradient(circle_at_bottom,_#e0f2fe,_transparent_50%)]" />
           <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-stretch">
-
             {/* LEFT : TEXT + BUTTON */}
             <div className="flex-1">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-600">
@@ -100,7 +99,10 @@ export default function HomePage() {
                 preferences to appear on top of search results.
               </p>
 
-              <button className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-pink-500 text-pink-600 text-xs sm:text-sm font-semibold bg-white/80 hover:bg-pink-50 transition shadow-sm">
+              <button
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-pink-500 text-pink-600 text-xs sm:text-sm font-semibold bg-white/80 hover:bg-pink-50 transition shadow-sm"
+                onClick={() => navigate("/app/profile")} // ⭐ go to My Profile page
+              >
                 Complete Profile
                 <ArrowRight size={14} />
               </button>
@@ -164,9 +166,7 @@ export default function HomePage() {
             {isPremium ? (
               <>
                 <div className="mt-4 space-y-1">
-                  <p className="text-lg font-semibold">
-                    {tierLabel} Member
-                  </p>
+                  <p className="text-lg font-semibold">{tierLabel} Member</p>
                   <p className="text-xs text-white/80">
                     Valid till <span className="font-medium">{expiresAt}</span>
                   </p>
@@ -190,6 +190,14 @@ export default function HomePage() {
                     Profile highlight
                   </div>
                 </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => navigate("/app/premium")}
+                  className="mt-5 w-full py-2 rounded-full bg-white text-[#e91e63] font-semibold text-xs sm:text-sm shadow-md hover:bg-pink-50 transition"
+                >
+                  View / Manage Premium
+                </motion.button>
               </>
             ) : (
               <>
@@ -203,12 +211,14 @@ export default function HomePage() {
                 <div className="mt-5 flex flex-col gap-2">
                   <motion.button
                     whileTap={{ scale: 0.96 }}
+                    onClick={() => navigate("/app/premium")}
                     className="w-full py-2 rounded-full bg-white text-[#e91e63] font-semibold text-xs sm:text-sm shadow-md hover:bg-pink-50 transition"
                   >
                     View Premium Plans
                   </motion.button>
                   <p className="text-[11px] text-white/80 text-center">
-                    Start with as low as <span className="font-semibold">₹299 / month</span>
+                    Start with as low as{" "}
+                    <span className="font-semibold">₹299 / month</span>
                   </p>
                 </div>
               </>
