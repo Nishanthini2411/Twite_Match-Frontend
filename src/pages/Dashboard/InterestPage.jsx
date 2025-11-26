@@ -13,7 +13,7 @@ import {
 // ---------------- SAMPLE DATA ----------------
 
 // Profiles who SENT interest to you
-const receivedProfiles = [
+const RECEIVED_SAMPLE = [
   {
     id: "R101",
     name: "Sutharsana Devi",
@@ -56,7 +56,7 @@ const receivedProfiles = [
 ];
 
 // Profiles YOU sent interest to
-const sentProfiles = [
+const SENT_SAMPLE = [
   {
     id: "S201",
     name: "Pavithra",
@@ -129,20 +129,24 @@ const InterestPage = () => {
   const [mainTab, setMainTab] = useState("received"); // "received" | "sent"
   const [subTab, setSubTab] = useState("all"); // "all" | "pending" | "accepted"
 
+  // State for profiles (so we can update on Accept/Decline)
+  const [receivedList, setReceivedList] = useState(RECEIVED_SAMPLE);
+  const [sentList, setSentList] = useState(SENT_SAMPLE);
+
   // modal + carousel state
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const sourceList = mainTab === "received" ? receivedProfiles : sentProfiles;
+  const sourceList = mainTab === "received" ? receivedList : sentList;
 
   const profiles = useMemo(() => {
+    let list = sourceList;
     if (subTab === "pending") {
-      return sourceList.filter((p) => p.status === "pending");
+      list = list.filter((p) => p.status === "pending");
+    } else if (subTab === "accepted") {
+      list = list.filter((p) => p.status === "accepted");
     }
-    if (subTab === "accepted") {
-      return sourceList.filter((p) => p.status === "accepted");
-    }
-    return sourceList;
+    return list;
   }, [sourceList, subTab]);
 
   const mainLabel =
@@ -171,10 +175,18 @@ const InterestPage = () => {
         </span>
       );
     }
+    if (status === "pending") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+          Pending
+        </span>
+      );
+    }
+    // For future use: declined / cancelled (if you add)
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-        Pending
+      <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-200">
+        Status
       </span>
     );
   };
@@ -213,9 +225,42 @@ const InterestPage = () => {
   const currentImageUrl =
     currentImages.length > 0 ? currentImages[currentImageIndex] : null;
 
+  // ---------- BUTTON ACTIONS (ALL CLICKABLE) ----------
+
+  const handleAccept = (id) => {
+    if (mainTab === "received") {
+      setReceivedList((prev) =>
+        prev.map((p) =>
+          p.id === id ? { ...p, status: "accepted" } : p
+        )
+      );
+    } else {
+      setSentList((prev) =>
+        prev.map((p) =>
+          p.id === id ? { ...p, status: "accepted" } : p
+        )
+      );
+    }
+  };
+
+  const handleDecline = (id) => {
+    if (mainTab === "received") {
+      // Remove from list (like Shaadi/Bharat)
+      setReceivedList((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      // For future use if you want decline on sent
+      setSentList((prev) => prev.filter((p) => p.id !== id));
+    }
+  };
+
+  const handleCancelInterest = (id) => {
+    // Only for "sent" tab – remove from sent list
+    setSentList((prev) => prev.filter((p) => p.id !== id));
+  };
+
   return (
     <div className="min-h-[calc(100vh-80px)] bg-slate-50 p-3 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
+      <div className="max-w-6xl mx-auto space-y-4 md:space-y-5">
         {/* HEADER + STATS */}
         <div className="flex flex-col gap-3 md:gap-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -224,13 +269,13 @@ const InterestPage = () => {
                 {mainLabel}
               </h1>
               <p className="text-xs md:text-sm text-slate-500 mt-1">
-                View and manage your interest requests in one place.
+                View and manage all interest requests here, just like in top matrimony apps.
               </p>
             </div>
 
             {/* Compact stats */}
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="bg-white rounded-lg border border-slate-100 px-3 py-2 flex flex-col">
+            <div className="grid grid-cols-3 gap-2 text-xs md:text-sm">
+              <div className="bg-white rounded-xl border border-slate-100 px-3 py-2 flex flex-col">
                 <span className="text-[11px] text-slate-400 uppercase tracking-wide">
                   Total
                 </span>
@@ -238,7 +283,7 @@ const InterestPage = () => {
                   {stats.total}
                 </span>
               </div>
-              <div className="bg-white rounded-lg border border-slate-100 px-3 py-2 flex flex-col">
+              <div className="bg-white rounded-xl border border-slate-100 px-3 py-2 flex flex-col">
                 <span className="text-[11px] text-slate-400 uppercase tracking-wide">
                   Pending
                 </span>
@@ -246,7 +291,7 @@ const InterestPage = () => {
                   {stats.pending}
                 </span>
               </div>
-              <div className="bg-white rounded-lg border border-slate-100 px-3 py-2 flex flex-col">
+              <div className="bg-white rounded-xl border border-slate-100 px-3 py-2 flex flex-col">
                 <span className="text-[11px] text-slate-400 uppercase tracking-wide">
                   Accepted
                 </span>
@@ -336,7 +381,7 @@ const InterestPage = () => {
           </div>
         </div>
 
-        {/* LIST */}
+        {/* LIST SECTION */}
         <motion.div
           className="space-y-3"
           variants={containerVariants}
@@ -374,7 +419,7 @@ const InterestPage = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="bg-white border border-slate-100 rounded-2xl shadow-sm p-3 md:p-4 flex gap-3 md:gap-3 hover:shadow-md transition-shadow cursor-pointer h-full"
+                  className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col"
                   whileHover={{
                     y: -3,
                     boxShadow: "0 18px 40px rgba(15,23,42,0.08)",
@@ -382,68 +427,90 @@ const InterestPage = () => {
                   whileTap={{ scale: 0.99 }}
                   onClick={() => openProfileModal(p)}
                 >
-                  {/* AVATAR */}
-                  <div className="relative shrink-0">
-                    <div className="w-16 h-20 md:w-20 md:h-24 rounded-xl overflow-hidden bg-slate-100">
-                      <img
-                        src={p.img}
-                        alt={p.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="absolute -bottom-2 left-0">
-                      {getStatusBadge(p.status)}
-                    </div>
-                  </div>
+                  {/* TOP STRIP */}
+                  <div className="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-rose-400 via-fuchsia-400 to-amber-300" />
 
-                  {/* DETAILS + ACTIONS */}
-                  <div className="flex-1 flex flex-col justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-slate-900 text-sm md:text-base truncate">
-                          {p.name}
-                        </p>
-                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                          {p.age} yrs
-                        </span>
+                  <div className="p-3 md:p-4 flex gap-3 md:gap-3">
+                    {/* AVATAR */}
+                    <div className="relative shrink-0">
+                      <div className="w-16 h-20 md:w-20 md:h-24 rounded-xl overflow-hidden bg-slate-100">
+                        <img
+                          src={p.img}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {p.location}
-                      </p>
-                      <p className="mt-1 text-[11px] text-slate-500 line-clamp-2">
-                        {mainTab === "received"
-                          ? "This profile has shown interest in you."
-                          : "You have sent interest to this profile."}
-                      </p>
+                      <div className="absolute -bottom-2 left-0">
+                        {getStatusBadge(p.status)}
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 mt-1">
-                      {mainTab === "received" ? (
-                        <>
+                    {/* DETAILS + ACTIONS */}
+                    <div className="flex-1 flex flex-col justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-slate-900 text-sm md:text-base truncate">
+                            {p.name}
+                          </p>
+                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                            {p.age} yrs
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {p.location}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-500 line-clamp-2">
+                          {mainTab === "received"
+                            ? "This profile has shown interest in you."
+                            : "You have sent interest to this profile."}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 mt-2">
+                        {mainTab === "received" ? (
+                          <>
+                            <button
+                              className="inline-flex items-center justify-center px-3 py-1.5 text-[11px] md:text-xs rounded-full bg-rose-500 text-white font-medium hover:bg-rose-600 transition shadow-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAccept(p.id);
+                              }}
+                            >
+                              <CheckCircle2 size={14} className="mr-1" />
+                              Accept
+                            </button>
+                            <button
+                              className="inline-flex items-center justify-center px-3 py-1.5 text-[11px] md:text-xs rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDecline(p.id);
+                              }}
+                            >
+                              <XCircle size={14} className="mr-1" />
+                              Decline
+                            </button>
+                          </>
+                        ) : p.status === "pending" ? (
                           <button
-                            className="inline-flex items-center justify-center px-3 py-1.5 text-[11px] md:text-xs rounded-full bg-rose-500 text-white font-medium hover:bg-rose-600 transition shadow-sm"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <CheckCircle2 size={14} className="mr-1" />
-                            Accept
-                          </button>
-                          <button
-                            className="inline-flex items-center justify-center px-3 py-1.5 text-[11px] md:text-xs rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
-                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center justify-center px-3 py-1.5 text-[11px] md:text-xs rounded-full border border-rose-200 text-rose-600 bg-rose-50 hover:bg-rose-100 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCancelInterest(p.id);
+                            }}
                           >
                             <XCircle size={14} className="mr-1" />
-                            Decline
+                            Cancel Interest
                           </button>
-                        </>
-                      ) : (
-                        <div
-                          className="inline-flex items-center gap-1 text-[11px] md:text-xs text-rose-600 bg-rose-50 px-3 py-1.5 rounded-full"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Heart size={13} />
-                          Interest sent
-                        </div>
-                      )}
+                        ) : (
+                          <div
+                            className="inline-flex items-center gap-1 text-[11px] md:text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <CheckCircle2 size={13} />
+                            Matched
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -464,7 +531,6 @@ const InterestPage = () => {
             onClick={closeProfileModal}
           >
             <motion.div
-              // 🔥 Smaller, nicely centered card
               className="relative bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg max-h-[80vh] p-4 md:p-5 flex flex-col"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

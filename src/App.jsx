@@ -9,11 +9,12 @@ import GuestPage from "./pages/GuestPage";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SuccessStories from "./pages/SuccessStories";
+import TermsPage from "./pages/TermsPage"; 
 
 // Register Page
 import RegisterPage from "./pages/Register/RegisterPage.jsx";
 
-// Dashboard
+// Dashboard Pages
 import DashboardLayout from "./pages/Dashboard/DashboardLayout";
 import HomePage from "./pages/Dashboard/HomePage";
 import MatchesPage from "./pages/Dashboard/MatchesPage";
@@ -26,19 +27,17 @@ import AccountPage from "./pages/Dashboard/AccountPage";
 import ProfileDetailsPage from "./pages/Dashboard/ProfileDetailsPage.jsx";
 import PremiumPage from "./pages/Dashboard/PremiumPage";
 
+// ⭐ NEW PAYMENT PAGE
+import PaymentPage from "./pages/Dashboard/PaymentPage";
+
 function App() {
   const dispatch = useDispatch();
-  const existingNotifications = useSelector(
-    (s) => s.notifications.items
-  );
+  const existingNotifications = useSelector((s) => s.notifications.items);
 
-  // -------------------------------------------
-  // 🔥 Seed sample notifications ONLY IF EMPTY
-  // -------------------------------------------
+  // Seed sample notifications
   useEffect(() => {
     if (existingNotifications.length > 0) return;
 
-    // NOTE: using fixed timestamps so they DON'T change on refresh
     dispatch(
       addNotification({
         id: 1001,
@@ -47,7 +46,7 @@ function App() {
         message: "Someone expressed interest in your profile.",
         actionUrl: "/app/interest",
         isRead: false,
-        createdAt: "2025-11-25T06:05:00", // 🔹 fixed time
+        createdAt: "2025-11-25T06:05:00",
       })
     );
 
@@ -59,7 +58,7 @@ function App() {
         message: "You received a new message.",
         actionUrl: "/app/messages",
         isRead: false,
-        createdAt: "2025-11-25T05:45:00", // 🔹 different fixed time
+        createdAt: "2025-11-25T05:45:00",
       })
     );
 
@@ -71,7 +70,19 @@ function App() {
         message: "Your profile has been successfully verified.",
         actionUrl: "/app/profile",
         isRead: false,
-        createdAt: "2025-11-24T21:30:00", // 🔹 previous day
+        createdAt: "2025-11-24T21:30:00",
+      })
+    );
+
+    dispatch(
+      addNotification({
+        id: 1004,
+        type: "payment",
+        title: "Premium Discount Activated",
+        message: "Gold Premium is now available at 30% discount for the next 5 days.",
+        actionUrl: "/app/premium",
+        isRead: false,
+        createdAt: "2025-11-25T09:15:00",
       })
     );
   }, [dispatch, existingNotifications.length]);
@@ -85,11 +96,12 @@ function App() {
         <Route path="/success-stories" element={<SuccessStories />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/terms" element={<TermsPage />} />
 
         {/* REGISTER PAGE */}
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* DASHBOARD */}
+        {/* DASHBOARD ROUTES */}
         <Route path="/app" element={<DashboardLayout />}>
           <Route index element={<Navigate to="home" replace />} />
           <Route path="home" element={<HomePage />} />
@@ -101,6 +113,10 @@ function App() {
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="account" element={<AccountPage />} />
           <Route path="premium" element={<PremiumPage />} />
+
+          {/* ⭐ NEW PAYMENT PAGE ROUTE */}
+          <Route path="payment" element={<PaymentPage />} />
+
           <Route path="profile-details/:id" element={<ProfileDetailsPage />} />
         </Route>
       </Routes>
