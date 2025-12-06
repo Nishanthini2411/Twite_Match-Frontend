@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Country, State, City } from "country-state-city"; // ⭐ ADDED
-
 const steps = [
   "Profile For",
   "Gender", // NEW STEP ADDED
@@ -10,6 +9,7 @@ const steps = [
   "Basic Details",
   "Height and Weight",
   "From",
+  "Citizenship / Nationality", // ⭐ NEW STEP
   "Upload Images",
   "Verification", // ⭐ NEW CONDITIONAL STEP (Face / ID)
   "Marital Status", // ✅ NEW STEP
@@ -25,6 +25,7 @@ const steps = [
   "Review",
   "Account Creation",
 ];
+
 
 export default function RegisterPage() {
   const [step, setStep] = useState(0);
@@ -50,6 +51,15 @@ export default function RegisterPage() {
     state: "",
     city: "",
   });
+
+    const [citizenshipInfo, setCitizenshipInfo] = useState({
+    country: "",
+    visaStatus: "",
+    visaOther: "",
+    settlementPlan: "",
+    settlementOther: "",
+  });
+
 
   const [educationInfo, setEducationInfo] = useState({
     qualification: "",
@@ -150,7 +160,7 @@ export default function RegisterPage() {
       </div>
 
       {/* CONTENT */}
-      <div className={`max-w-4xl mx-auto ${anim}`}>
+             <div className={`max-w-4xl mx-auto ${anim}`}>
         {step === 0 && (
           <ProfileFor value={profileFor} onChange={setProfileFor} />
         )}
@@ -161,10 +171,22 @@ export default function RegisterPage() {
         )}
         {step === 4 && <HeightandWeight />}
         {step === 5 && <From onLocationChange={setLocationInfo} />}
+
+        {/* ⭐ NEW CITIZENSHIP / NATIONALITY STEP */}
         {step === 6 && (
-          <UploadImages images={uploadedImages} setImages={setUploadedImages} />
+          <Citizenship
+            value={citizenshipInfo}
+            onChange={setCitizenshipInfo}
+          />
         )}
+
         {step === 7 && (
+          <UploadImages
+            images={uploadedImages}
+            setImages={setUploadedImages}
+          />
+        )}
+        {step === 8 && (
           <Verification
             profileFor={profileFor}
             faceVerified={faceVerified}
@@ -173,26 +195,27 @@ export default function RegisterPage() {
             setIdVerified={setIdVerified}
           />
         )}
-        {step === 8 && <MaritalStatus />}{/* ✅ NEW */}
-        {step === 9 && <Hobbies />}
-        {step === 10 && <Horoscope />}
-        {step === 11 && <Religion />}
-        {step === 12 && <Eating />}
-        {step === 13 && (
+        {step === 9 && <MaritalStatus />}{/* ✅ NEW */}
+        {step === 10 && <Hobbies />}
+        {step === 11 && <Horoscope />}
+        {step === 12 && <Religion />}
+        {step === 13 && <Eating />}
+        {step === 14 && (
           <Education onEducationChange={setEducationInfo} />
         )}
-        {step === 14 && <Work onWorkChange={setWorkInfo} />}
-        {step === 15 && <Family onFamilyChange={setFamilyInfo} />}
-        {step === 16 && <SiblingDetails />}{/* ✅ NEW */}
-        {step === 17 && (
+        {step === 15 && <Work onWorkChange={setWorkInfo} />}
+        {step === 16 && <Family onFamilyChange={setFamilyInfo} />}
+        {step === 17 && <SiblingDetails />}{/* ✅ NEW */}
+        {step === 18 && (
           <PartnerDetails onPartnerChange={setPartnerInfo} />
         )}
-        {step === 18 && <Review />}
-        {step === 19 && (
+        {step === 19 && <Review />}
+        {step === 20 && (
           <Account
             profileData={{
               basic: basicInfo,
               location: locationInfo,
+              citizenship: citizenshipInfo, // ⭐ ADDED
               education: educationInfo,
               work: workInfo,
               family: familyInfo,
@@ -205,6 +228,7 @@ export default function RegisterPage() {
           />
         )}
       </div>
+
 
       {/* BUTTONS – HIDE ON LAST STEP (Account handles its own flow) */}
       {step !== steps.length - 1 && (
@@ -309,19 +333,19 @@ function ProfileFor({ value, onChange }) {
                 setSelected(o);
                 onChange && onChange(o);
               }}
-              className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors
-                ${active ? "bg-pink-50" : "bg-white hover:bg-gray-50"}`}
+              className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors ${
+                active ? "bg-pink-50" : "bg-white hover:bg-gray-50"
+              }`}
             >
               <span className="text-gray-800">{o}</span>
 
               {/* custom radio indicator */}
               <span
-                className={`inline-flex h-4 w-4 items-center justify-center rounded-full border 
-                  ${
-                    active
-                      ? "border-pink-500 bg-pink-500"
-                      : "border-gray-300 bg-white"
-                  }`}
+                className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+                  active
+                    ? "border-pink-500 bg-pink-500"
+                    : "border-gray-300 bg-white"
+                }`}
               >
                 {active && (
                   <span className="h-2 w-2 rounded-full bg-white" />
@@ -363,13 +387,11 @@ function Gender() {
               key={opt.value}
               type="button"
               onClick={() => setGender(opt.value)}
-              className={`text-left px-4 py-3 rounded-2xl border text-sm transition-all
-                bg-white hover:bg-pink-50 hover:-translate-y-[1px] shadow-sm
-                ${
-                  isActive
-                    ? "border-pink-500 ring-2 ring-pink-100"
-                    : "border-gray-200"
-                }`}
+              className={`text-left px-4 py-3 rounded-2xl border text-sm transition-all bg-white hover:bg-pink-50 hover:-translate-y-[1px] shadow-sm ${
+                isActive
+                  ? "border-pink-500 ring-2 ring-pink-100"
+                  : "border-gray-200"
+              }`}
             >
               <div className="font-semibold text-gray-900">{opt.label}</div>
               <div className="text-[11px] text-gray-500 mt-0.5">
@@ -684,10 +706,8 @@ function HeightandWeight() {
           className="absolute h-[3px] bg-pink-500 rounded-full top-1/2 -translate-y-1/2"
           style={{
             left: `${getPercent(minHeight, MIN_HEIGHT, MAX_HEIGHT)}%`,
-            width: `${
-              getPercent(maxHeight, MIN_HEIGHT, MAX_HEIGHT) -
-              getPercent(minHeight, MIN_HEIGHT, MAX_HEIGHT)
-            }%`,
+            width: `${getPercent(maxHeight, MIN_HEIGHT, MAX_HEIGHT) -
+              getPercent(minHeight, MIN_HEIGHT, MAX_HEIGHT)}%`,
           }}
         ></div>
 
@@ -749,10 +769,8 @@ function HeightandWeight() {
           className="absolute h-[3px] bg-pink-500 rounded-full top-1/2 -translate-y-1/2"
           style={{
             left: `${getPercent(minWeight, MIN_WEIGHT, MAX_WEIGHT)}%`,
-            width: `${
-              getPercent(maxWeight, MIN_WEIGHT, MAX_WEIGHT) -
-              getPercent(minWeight, MIN_WEIGHT, MAX_WEIGHT)
-            }%`,
+            width: `${getPercent(maxWeight, MIN_WEIGHT, MAX_WEIGHT) -
+              getPercent(minWeight, MIN_WEIGHT, MAX_WEIGHT)}%`,
           }}
         ></div>
 
@@ -1002,6 +1020,193 @@ function From({ onLocationChange }) {
     </div>
   );
 }
+
+/* ==== NEW: CITIZENSHIP / NATIONALITY STEP ==== */
+
+function Citizenship({ value, onChange }) {
+  const [countries, setCountries] = useState([]);
+
+  const [country, setCountry] = useState(value?.country || "");
+  const [searchCountry, setSearchCountry] = useState("");
+
+  const [visaStatus, setVisaStatus] = useState(value?.visaStatus || "");
+  const [visaOther, setVisaOther] = useState(value?.visaOther || "");
+
+  const [settlementPlan, setSettlementPlan] = useState(
+    value?.settlementPlan || ""
+  );
+  const [settlementOther, setSettlementOther] = useState(
+    value?.settlementOther || ""
+  );
+
+  const visaOptions = [
+    "Student Visa",
+    "Work Permit",
+    "Permanent Resident (PR)",
+    "Citizen",
+    "Visitor / Dependent",
+    "Others",
+  ];
+
+  const settlementOptions = [
+    "Plan to settle in Canada",
+    "Plan to return to Sri Lanka",
+    "Not decided yet",
+    "Others",
+  ];
+
+  useEffect(() => {
+    // Load all countries from country-state-city
+    setCountries(Country.getAllCountries());
+  }, []);
+
+  // send data to parent whenever something changes
+  useEffect(() => {
+    if (!onChange) return;
+
+    const finalVisa = visaStatus === "Others" ? visaOther : visaStatus;
+    const finalSettlement =
+      settlementPlan === "Others" ? settlementOther : settlementPlan;
+
+    onChange({
+      country,
+      visaStatus: finalVisa,
+      visaOther: visaStatus === "Others" ? visaOther : "",
+      settlementPlan: finalSettlement,
+      settlementOther: settlementPlan === "Others" ? settlementOther : "",
+    });
+  }, [
+    country,
+    visaStatus,
+    visaOther,
+    settlementPlan,
+    settlementOther,
+    onChange,
+  ]);
+
+  const effectiveCountryInputValue = country || searchCountry;
+
+  return (
+    <Section title="Citizenship / Nationality">
+      {/* COUNTRY */}
+      <div className="mb-6">
+        <p className="text-sm font-medium text-gray-700 mb-2">Country</p>
+
+        <input
+          className="w-full border rounded-xl p-3"
+          placeholder="Search country..."
+          value={effectiveCountryInputValue}
+          onChange={(e) => {
+            setCountry("");
+            setSearchCountry(e.target.value);
+          }}
+        />
+
+        {!country && (
+          <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
+            {countries
+              .filter((c) =>
+                c.name.toLowerCase().includes(searchCountry.toLowerCase())
+              )
+              .map((c) => (
+                <div
+                  key={c.isoCode}
+                  onClick={() => {
+                    setCountry(c.name);
+                    setSearchCountry("");
+                  }}
+                  className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
+                >
+                  {c.name}
+                </div>
+              ))}
+
+            {countries.filter((c) =>
+              c.name.toLowerCase().includes(searchCountry.toLowerCase())
+            ).length === 0 && (
+              <div className="p-3 text-gray-500 text-sm">
+                No country found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* VISA STATUS */}
+      <div className="mb-6">
+        <p className="text-sm font-medium text-gray-700 mb-2">
+          Visa Status
+        </p>
+        <select
+          className="w-full p-3 border rounded-lg bg-white text-sm"
+          value={visaStatus}
+          onChange={(e) => {
+            setVisaStatus(e.target.value);
+            if (e.target.value !== "Others") {
+              setVisaOther("");
+            }
+          }}
+        >
+          <option value="" disabled>
+            Select Visa Status
+          </option>
+          {visaOptions.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+
+        {/* OTHER VISA TEXT BOX */}
+        {visaStatus === "Others" && (
+          <input
+            className="mt-3 w-full p-2 border rounded-lg text-sm"
+            placeholder="Type your visa status"
+            value={visaOther}
+            onChange={(e) => setVisaOther(e.target.value)}
+          />
+        )}
+      </div>
+
+      {/* FUTURE SETTLEMENT PLAN */}
+      <div className="mb-2">
+        <p className="text-sm font-medium text-gray-700 mb-2">
+          Future Settlement Plan
+        </p>
+        <select
+          className="w-full p-3 border rounded-lg bg-white text-sm"
+          value={settlementPlan}
+          onChange={(e) => {
+            setSettlementPlan(e.target.value);
+            if (e.target.value !== "Others") {
+              setSettlementOther("");
+            }
+          }}
+        >
+          <option value="" disabled>
+            Select Future Settlement Plan
+          </option>
+          {settlementOptions.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+
+        {/* OTHER SETTLEMENT TEXT BOX */}
+        {settlementPlan === "Others" && (
+          <input
+            className="mt-3 w-full p-2 border rounded-lg text-sm"
+            placeholder="Type your settlement plan"
+            value={settlementOther}
+            onChange={(e) => setSettlementOther(e.target.value)}
+          />
+        )}
+      </div>
+    </Section>
+  );
+}
+
 
 /* ==== UPDATED: UPLOAD 4 IMAGES WITH PREVIEW ==== */
 
@@ -1567,12 +1772,11 @@ function Hobbies() {
           <button
             key={cat}
             onClick={() => setOpenCategory(openCategory === cat ? null : cat)}
-            className={`px-4 py-1.5 rounded-full text-sm border 
-              ${
-                openCategory === cat
-                  ? "bg-pink-600 text-white"
-                  : "border-gray-300 text-gray-800 bg-white"
-              }`}
+            className={`px-4 py-1.5 rounded-full text-sm border ${
+              openCategory === cat
+                ? "bg-pink-600 text-white"
+                : "border-gray-300 text-gray-800 bg-white"
+            }`}
           >
             {cat}
           </button>
@@ -1591,12 +1795,11 @@ function Hobbies() {
               <button
                 key={item}
                 onClick={() => toggleChip(item)}
-                className={`px-4 py-1.5 rounded-full text-xs border transition 
-                  ${
-                    selectedValues.includes(item)
-                      ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white"
-                      : "border-gray-300 text-gray-700 bg-white"
-                  }`}
+                className={`px-4 py-1.5 rounded-full text-xs border transition ${
+                  selectedValues.includes(item)
+                    ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white"
+                    : "border-gray-300 text-gray-700 bg-white"
+                }`}
               >
                 {item}
               </button>
@@ -1662,6 +1865,98 @@ function Horoscope() {
     "Revati",
   ];
 
+  // -------- DOSHAM DROPDOWN ----------
+  const doshamOptions = [
+    "Doesn't Matter",
+    "Don't know",
+    "No Dosham",
+    "Yes",
+    "Not Specified",
+  ];
+
+  const specificDoshamList = [
+    "Chevvai Dosham",
+    "Rahu Dosham",
+    "Kethu Dosham",
+    "Kalasarpa Dosham",
+    "Sarpa Dosham",
+    "Other",
+  ];
+
+  const [showDoshamDD, setShowDoshamDD] = useState(false);
+  const [selectedDoshamOptions, setSelectedDoshamOptions] = useState([]);
+  const [selectedSpecificDosham, setSelectedSpecificDosham] = useState([]);
+
+  const doshamLabel =
+    selectedDoshamOptions.length > 0
+      ? selectedDoshamOptions.join(", ")
+      : "Dosham Preference";
+
+  const toggleDoshamOption = (opt) => {
+    setSelectedDoshamOptions((prev) =>
+      prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
+    );
+  };
+
+  const toggleSpecificDosham = (opt) => {
+    setSelectedSpecificDosham((prev) =>
+      prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
+    );
+  };
+
+  const hasDoshamYes = selectedDoshamOptions.includes("Yes");
+
+  // ---------- GOTHRA DROPDOWN ----------
+
+  // same style like Dosham: first preference list
+  const gothraPrefOptions = [
+    "Doesn't Matter",
+    "Don't know",
+    "No Dosham",
+    "Yes",
+    "Not Specified",
+  ];
+
+  // actual gothra list (shown only when "Yes" selected)
+  const gothraOptions = [
+    "Kashyapa",
+    "Bharadwaj",
+    "Vasishta",
+    "Gautama",
+    "Atri",
+    "Agasthya",
+    "Vishwamitra",
+    "Kaushika",
+    "Parashar",
+    "Haritasya",
+    "Jamadagni",
+    "Other",
+  ];
+
+  const [showGothraPrefDD, setShowGothraPrefDD] = useState(false);
+  const [selectedGothraPref, setSelectedGothraPref] = useState([]);
+
+  const [selectedGothras, setSelectedGothras] = useState([]);
+
+  const gothraPrefLabel =
+    selectedGothraPref.length > 0
+      ? selectedGothraPref.join(", ")
+      : "Gothra Preference";
+
+  const toggleGothraPref = (opt) => {
+    setSelectedGothraPref((prev) =>
+      prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
+    );
+  };
+
+  const gothraHasYes = selectedGothraPref.includes("Yes");
+
+  const toggleGothra = (g) => {
+    setSelectedGothras((prev) =>
+      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]
+    );
+  };
+
   return (
     <Section title="Horoscope Details">
       {/* Date */}
@@ -1680,24 +1975,174 @@ function Horoscope() {
       <select className="w-full p-2 border rounded mb-3 focus:ring-pink-500 focus:border-pink-500">
         <option value="">Select Nakshatra</option>
         <option value="Prefer Not to Say">Prefer Not to Say</option>
-
         {nakshatraList.map((n) => (
           <option key={n}>{n}</option>
         ))}
       </select>
 
       {/* Raasi Dropdown */}
-      <select className="w-full p-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+      <select className="w-full p-2 border rounded focus:ring-pink-500 focus:border-pink-500 mb-4">
         <option value="">Select Raasi</option>
         <option value="Prefer Not to Say">Prefer Not to Say</option>
-
         {raasiList.map((r) => (
           <option key={r}>{r}</option>
         ))}
       </select>
+
+      {/* ------------ DOSHAM MULTI SELECT ------------- */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Dosha(m)
+        </label>
+
+        {/* Trigger */}
+        <button
+          type="button"
+          onClick={() => setShowDoshamDD((v) => !v)}
+          className="w-full flex items-center justify-between px-3 py-2 border rounded-lg text-left text-sm"
+        >
+          <span className="truncate">{doshamLabel}</span>
+          <span className="ml-2 text-xs text-gray-500">▼</span>
+        </button>
+
+        {/* Dropdown */}
+        {showDoshamDD && (
+          <div className="mt-1 border rounded-lg max-h-60 overflow-auto text-sm shadow-sm bg-white">
+            {doshamOptions.map((opt) => (
+              <label
+                key={opt}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-orange-50 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  className="accent-orange-500"
+                  checked={selectedDoshamOptions.includes(opt)}
+                  onChange={() => toggleDoshamOption(opt)}
+                />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
+        )}
+
+        {/* If YES selected → show specific dosham box */}
+        {hasDoshamYes && (
+          <div className="mt-3 border rounded-lg p-3 bg-orange-50/40">
+            <p className="text-xs font-medium text-gray-700 mb-2">
+              Select Specific Dosham(s)
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {specificDoshamList.map((d) => (
+                <label
+                  key={d}
+                  className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    className="accent-orange-500"
+                    checked={selectedSpecificDosham.includes(d)}
+                    onChange={() => toggleSpecificDosham(d)}
+                  />
+                  <span className="truncate">{d}</span>
+                </label>
+              ))}
+            </div>
+
+            {selectedSpecificDosham.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {selectedSpecificDosham.map((d) => (
+                  <span
+                    key={d}
+                    className="px-2 py-1 text-[11px] rounded-full bg-orange-100 text-orange-700"
+                  >
+                    {d}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ------------ GOTHRA MULTI SELECT ------------- */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Gothra
+        </label>
+
+        {/* Preference Trigger */}
+        <button
+          type="button"
+          onClick={() => setShowGothraPrefDD((v) => !v)}
+          className="w-full flex items-center justify-between px-3 py-2 border rounded-lg text-left text-sm"
+        >
+          <span className="truncate">{gothraPrefLabel}</span>
+          <span className="ml-2 text-xs text-gray-500">▼</span>
+        </button>
+
+        {/* Preference dropdown */}
+        {showGothraPrefDD && (
+          <div className="mt-1 border rounded-lg max-h-60 overflow-auto text-sm shadow-sm bg-white">
+            {gothraPrefOptions.map((opt) => (
+              <label
+                key={opt}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-orange-50 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  className="accent-orange-500"
+                  checked={selectedGothraPref.includes(opt)}
+                  onChange={() => toggleGothraPref(opt)}
+                />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
+        )}
+
+        {/* If YES selected → show gothra list box */}
+        {gothraHasYes && (
+          <div className="mt-3 border rounded-lg p-3 bg-orange-50/40">
+            <p className="text-xs font-medium text-gray-700 mb-2">
+              Select Gothra(s)
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {gothraOptions.map((g) => (
+                <label
+                  key={g}
+                  className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    className="accent-orange-500"
+                    checked={selectedGothras.includes(g)}
+                    onChange={() => toggleGothra(g)}
+                  />
+                  <span className="truncate">{g}</span>
+                </label>
+              ))}
+            </div>
+
+            {selectedGothras.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {selectedGothras.map((g) => (
+                  <span
+                    key={g}
+                    className="px-2 py-1 text-[11px] rounded-full bg-orange-100 text-orange-700"
+                  >
+                    {g}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </Section>
   );
 }
+
 
 function Religion() {
   const religions = [
@@ -1733,14 +2178,37 @@ function Religion() {
     "Prefer Not to Say",
   ];
 
+  // 👇 SUB–CASTE LIST
+  const subCasteMap = {
+    Brahmin: ["Iyer", "Iyengar", "Smartha", "Other"],
+    Kshatriya: ["Rajput", "Maratha", "Other"],
+    Vaishya: ["Komati", "Agarwal", "Other"],
+    Shudra: ["Other"],
+    Reddy: ["Kapus", "Pakanati", "Other"],
+    Gounder: ["Kongu Vellala", "Other"],
+    Nadar: ["Shanar", "Other"],
+    Naidu: ["Kamma", "Balija", "Kappu", "Other"],
+    Vanniyar: ["Pandayam", "Other"],
+    Mudaliyar: ["Thuluva", "Thondaimandala", "Other"],
+    Chettiar: ["Nagarathar", "Devanga", "Other"],
+    Yadava: ["Konar", "Other"],
+    "SC / ST": ["Paraiyar", "Dalit", "Other"],
+    Other: ["Other"],
+    "Prefer Not to Say": ["Prefer Not to Say"],
+  };
+
   const [religion, setReligion] = useState("");
   const [searchReligion, setSearchReligion] = useState("");
 
   const [caste, setCaste] = useState("");
   const [searchCaste, setSearchCaste] = useState("");
 
+  const [subCaste, setSubCaste] = useState("");
+  const [searchSub, setSearchSub] = useState("");
+
   return (
     <Section title="Religion Details">
+
       {/* RELIGION */}
       <p className="text-sm font-medium text-gray-700 mb-2">Religion</p>
       <input
@@ -1783,6 +2251,7 @@ function Religion() {
         onChange={(e) => {
           setCaste("");
           setSearchCaste(e.target.value);
+          setSubCaste("");
         }}
       />
 
@@ -1807,17 +2276,49 @@ function Religion() {
         </div>
       )}
 
-      {/* DOSHAM */}
-      <input
-        className="w-full p-3 border rounded-xl mb-3 mt-6"
-        placeholder="Dosham"
-      />
+      {/* SUB CASTE */}
+      {caste && (
+        <>
+          <p className="text-sm font-medium text-gray-700 mt-6 mb-2">
+            Sub Caste
+          </p>
 
-      {/* GOTHRA */}
-      <input className="w-full p-3 border rounded-xl" placeholder="Gothra" />
+          <input
+            className="w-full border rounded-xl p-3"
+            placeholder="Search sub caste..."
+            value={subCaste || searchSub}
+            onChange={(e) => {
+              setSubCaste("");
+              setSearchSub(e.target.value);
+            }}
+          />
+
+          {!subCaste && (
+            <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
+              {(subCasteMap[caste] || [])
+                .filter((s) =>
+                  s.toLowerCase().includes(searchSub.toLowerCase())
+                )
+                .map((s) => (
+                  <div
+                    key={s}
+                    className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
+                    onClick={() => {
+                      setSubCaste(s);
+                      setSearchSub("");
+                    }}
+                  >
+                    {s}
+                  </div>
+                ))}
+            </div>
+          )}
+        </>
+      )}
     </Section>
   );
 }
+
 
 function Eating() {
   return (
@@ -1852,36 +2353,92 @@ function Eating() {
 /* ==== UPDATED EDUCATION WITH COUNTRY -> UNIVERSITIES ==== */
 function Education({ onEducationChange }) {
   const countryList = [
-    "India",
-    "Sri Lanka",
-    "USA",
-    "UK",
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "Argentina",
     "Australia",
-    "Canada",
-    "Germany",
-    "France",
-    "Japan",
-    "China",
-    "Singapore",
-    "Malaysia",
-    "New Zealand",
-    "UAE",
-    "Italy",
-    "Netherlands",
-    "Sweden",
-    "Norway",
-    "Denmark",
-    "Switzerland",
-    "Ireland",
-    "South Africa",
-    "Brazil",
-    "Mexico",
-    "Russia",
-    "Spain",
-    "Portugal",
+    "Austria",
     "Bangladesh",
-    "Pakistan",
+    "Belgium",
+    "Bhutan",
+    "Brazil",
+    "Canada",
+    "China",
+    "Denmark",
+    "Egypt",
+    "Finland",
+    "France",
+    "Germany",
+    "Greece",
+    "Hong Kong",
+    "Iceland",
+    "India",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "Ireland",
+    "Israel",
+    "Italy",
+    "Japan",
+    "Kenya",
+    "Kuwait",
+    "Malaysia",
+    "Mexico",
     "Nepal",
+    "Netherlands",
+    "New Zealand",
+    "Nigeria",
+    "Norway",
+    "Pakistan",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Qatar",
+    "Russia",
+    "Saudi Arabia",
+    "Singapore",
+    "South Africa",
+    "South Korea",
+    "Spain",
+    "Sri Lanka",
+    "Sweden",
+    "Switzerland",
+    "Thailand",
+    "Turkey",
+    "UAE",
+    "UK",
+    "USA",
+    "Vietnam",
+  ];
+
+  // qualification dropdown options
+  const qualificationOptions = [
+    "Below 10th",
+    "10th / SSLC",
+    "12th / HSC",
+    "Diploma",
+    "B.A",
+    "B.Sc",
+    "B.Com",
+    "BBA",
+    "BCA",
+    "B.E / B.Tech",
+    "B.Pharm",
+    "B.Ed",
+    "LLB",
+    "MBBS",
+    "M.A",
+    "M.Sc",
+    "M.Com",
+    "MBA",
+    "MCA",
+    "M.E / M.Tech",
+    "M.Pharm",
+    "M.Phil",
+    "PhD / Doctorate",
+    "Professional Course",
+    "Others",
   ];
 
   // 🔹 fallback universities if API fails (just some popular ones)
@@ -1926,13 +2483,15 @@ function Education({ onEducationChange }) {
   };
 
   const [qualification, setQualification] = useState("");
+  const [qualificationOther, setQualificationOther] = useState("");
 
   const [country, setCountry] = useState("");
   const [searchCountry, setSearchCountry] = useState("");
 
   // 🔹 universities based on country
-  const [universities, setUniversities] = useState([]); // ✅ no <string[]>
+  const [universities, setUniversities] = useState([]);
   const [university, setUniversity] = useState("");
+  const [universityOther, setUniversityOther] = useState("");
   const [searchUniversity, setSearchUniversity] = useState("");
   const [loadingUniversities, setLoadingUniversities] = useState(false);
   const [uniError, setUniError] = useState("");
@@ -1942,6 +2501,7 @@ function Education({ onEducationChange }) {
     if (!country) {
       setUniversities([]);
       setUniversity("");
+      setUniversityOther("");
       setSearchUniversity("");
       setUniError("");
       return;
@@ -1963,9 +2523,8 @@ function Education({ onEducationChange }) {
         ).sort();
 
         if (names.length > 0) {
-          setUniversities(names); // ✅ API gives full list
+          setUniversities(names);
         } else {
-          // 🔸 API returned nothing → fallback list (if available)
           if (fallbackUniversitiesByCountry[country]) {
             setUniversities(fallbackUniversitiesByCountry[country]);
           } else {
@@ -1978,7 +2537,6 @@ function Education({ onEducationChange }) {
         setUniError(
           "Unable to load universities from server. You can type manually."
         );
-        // 🔸 use fallback if possible
         if (fallbackUniversitiesByCountry[country]) {
           setUniversities(fallbackUniversitiesByCountry[country]);
         } else {
@@ -1988,27 +2546,59 @@ function Education({ onEducationChange }) {
       .finally(() => setLoadingUniversities(false));
   }, [country]);
 
-  // 🔹 Sync to parent (RegisterPage) whenever qualification/university changes
+  // 🔹 Sync to parent whenever qualification/university changes
   useEffect(() => {
-    if (onEducationChange) {
-      onEducationChange({
-        qualification,
-        institute: university || "",
-      });
-    }
-  }, [qualification, university, onEducationChange]);
+    if (!onEducationChange) return;
+
+    const finalQualification =
+      qualification === "Others" ? qualificationOther : qualification;
+
+    const finalInstitute =
+      university === "Others" ? universityOther : university;
+
+    onEducationChange({
+      qualification: finalQualification,
+      institute: finalInstitute || "",
+      country,
+    });
+  }, [
+    qualification,
+    qualificationOther,
+    university,
+    universityOther,
+    country,
+    onEducationChange,
+  ]);
 
   return (
     <Section title="Education">
-      {/* Qualification */}
-      <input
-        className="w-full p-2 border rounded mb-3"
-        placeholder="Qualification (e.g., B.E, B.Sc, MBA)"
+      {/* QUALIFICATION – DROPDOWN + OTHERS BOX */}
+      <p className="text-sm font-medium text-gray-700 mb-2">Qualification</p>
+      <select
+        className="w-full p-2 border rounded mb-3 bg-white"
         value={qualification}
         onChange={(e) => setQualification(e.target.value)}
-      />
+      >
+        <option value="" disabled>
+          Select qualification
+        </option>
+        {qualificationOptions.map((q) => (
+          <option key={q} value={q}>
+            {q}
+          </option>
+        ))}
+      </select>
 
-      {/* COUNTRY */}
+      {qualification === "Others" && (
+        <input
+          className="w-full p-2 border rounded mb-3"
+          placeholder="Type your qualification"
+          value={qualificationOther}
+          onChange={(e) => setQualificationOther(e.target.value)}
+        />
+      )}
+
+      {/* COUNTRY – SEARCHABLE DROPDOWN */}
       <p className="text-sm font-medium text-gray-700 mb-2">Country</p>
 
       <input
@@ -2021,7 +2611,6 @@ function Education({ onEducationChange }) {
         }}
       />
 
-      {/* COUNTRY DROPDOWN */}
       {!country && (
         <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
           {countryList
@@ -2032,7 +2621,7 @@ function Education({ onEducationChange }) {
               <div
                 key={c}
                 onClick={() => {
-                  setCountry(c); // ✅ important: actual selection
+                  setCountry(c);
                   setSearchCountry("");
                 }}
                 className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
@@ -2049,7 +2638,7 @@ function Education({ onEducationChange }) {
         </div>
       )}
 
-      {/* 🔹 WHERE STUDIED – UNIVERSITIES DROPDOWN */}
+      {/* UNIVERSITY SECTION – ONLY AFTER COUNTRY SELECTED */}
       {country && (
         <>
           <p className="text-sm font-medium text-gray-700 mt-6 mb-2">
@@ -2066,6 +2655,7 @@ function Education({ onEducationChange }) {
             value={university || searchUniversity}
             onChange={(e) => {
               setUniversity("");
+              setUniversityOther("");
               setSearchUniversity(e.target.value);
             }}
           />
@@ -2088,7 +2678,7 @@ function Education({ onEducationChange }) {
                     <div
                       key={u}
                       onClick={() => {
-                        setUniversity(u); // ✅ selection
+                        setUniversity(u);
                         setSearchUniversity("");
                       }}
                       className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
@@ -2097,6 +2687,18 @@ function Education({ onEducationChange }) {
                     </div>
                   ))}
 
+              {!loadingUniversities && (
+                <div
+                  onClick={() => {
+                    setUniversity("Others");
+                    setSearchUniversity("");
+                  }}
+                  className="p-3 cursor-pointer hover:bg-gray-100 text-sm border-t"
+                >
+                  Others
+                </div>
+              )}
+
               {!loadingUniversities &&
                 universities.filter((u) =>
                   u.toLowerCase().includes(searchUniversity.toLowerCase())
@@ -2104,16 +2706,27 @@ function Education({ onEducationChange }) {
                   <div className="p-3 text-gray-500 text-sm">
                     {uniError
                       ? uniError
-                      : "No universities found. You can type the institute name manually."}
+                      : "No universities found. You can choose Others and type manually."}
                   </div>
                 )}
             </div>
+          )}
+
+          {/* OTHERS BOX FOR UNIVERSITY */}
+          {university === "Others" && (
+            <input
+              className="w-full p-2 border rounded mt-3"
+              placeholder="Type your university / college"
+              value={universityOther}
+              onChange={(e) => setUniversityOther(e.target.value)}
+            />
           )}
         </>
       )}
     </Section>
   );
 }
+
 
 /* ==== UPDATED WORK: MONTHLY INCOME + CURRENCY + lift to parent ==== */
 function Work({ onWorkChange }) {
@@ -2147,25 +2760,61 @@ function Work({ onWorkChange }) {
     "Driver",
     "Technician",
     "Student",
-    "Not Working",
+    
+    "Others",
   ];
 
-  const [occupation, setOccupation] = useState("");
-  const [searchOccupation, setSearchOccupation] = useState("");
-  const [employmentType, setEmploymentType] = useState("");
-
-  // 🔹 NEW: monthly income + currency
+  // 🔹 World currencies (main ones)
   const currencyOptions = [
-    { code: "INR", label: "₹ Indian Rupee" },
-    { code: "LKR", label: "Rs Sri Lankan Rupee" },
-    { code: "USD", label: "$ US Dollar" },
-    { code: "EUR", label: "€ Euro" },
-    { code: "GBP", label: "£ British Pound" },
-    { code: "AED", label: "د.إ UAE Dirham" },
-    { code: "AUD", label: "A$ Australian Dollar" },
-    { code: "CAD", label: "C$ Canadian Dollar" },
-    { code: "SGD", label: "S$ Singapore Dollar" },
+    { code: "INR", label: "₹ Indian Rupee (INR)" },
+    { code: "LKR", label: "Rs Sri Lankan Rupee (LKR)" },
+    { code: "USD", label: "$ US Dollar (USD)" },
+    { code: "EUR", label: "€ Euro (EUR)" },
+    { code: "GBP", label: "£ British Pound (GBP)" },
+    { code: "AED", label: "د.إ UAE Dirham (AED)" },
+    { code: "SAR", label: "﷼ Saudi Riyal (SAR)" },
+    { code: "QAR", label: "QAR Qatari Riyal" },
+    { code: "KWD", label: "KWD Kuwaiti Dinar" },
+    { code: "OMR", label: "OMR Omani Rial" },
+    { code: "BHD", label: "BHD Bahraini Dinar" },
+    { code: "AUD", label: "A$ Australian Dollar (AUD)" },
+    { code: "NZD", label: "NZ$ New Zealand Dollar (NZD)" },
+    { code: "CAD", label: "C$ Canadian Dollar (CAD)" },
+    { code: "SGD", label: "S$ Singapore Dollar (SGD)" },
+    { code: "HKD", label: "HK$ Hong Kong Dollar (HKD)" },
+    { code: "JPY", label: "¥ Japanese Yen (JPY)" },
+    { code: "CNY", label: "¥ Chinese Yuan (CNY)" },
+    { code: "CHF", label: "CHF Swiss Franc" },
+    { code: "SEK", label: "SEK Swedish Krona" },
+    { code: "NOK", label: "NOK Norwegian Krone" },
+    { code: "DKK", label: "DKK Danish Krone" },
+    { code: "RUB", label: "RUB Russian Ruble" },
+    { code: "ZAR", label: "ZAR South African Rand" },
+    { code: "MYR", label: "RM Malaysian Ringgit (MYR)" },
+    { code: "THB", label: "฿ Thai Baht (THB)" },
+    { code: "IDR", label: "IDR Indonesian Rupiah" },
+    { code: "VND", label: "VND Vietnamese Dong" },
+    { code: "PHP", label: "₱ Philippine Peso (PHP)" },
+    { code: "BDT", label: "৳ Bangladeshi Taka (BDT)" },
+    { code: "PKR", label: "₨ Pakistani Rupee (PKR)" },
+    { code: "MXN", label: "$ Mexican Peso (MXN)" },
+    { code: "BRL", label: "R$ Brazilian Real (BRL)" },
+    { code: "ARS", label: "ARS Argentine Peso" },
+    { code: "CLP", label: "CLP Chilean Peso" },
+    { code: "COP", label: "COP Colombian Peso" },
+    { code: "PEN", label: "PEN Peruvian Sol" },
+    { code: "NGN", label: "₦ Nigerian Naira (NGN)" },
+    { code: "EGP", label: "EGP Egyptian Pound" },
+    { code: "ILS", label: "₪ Israeli Shekel (ILS)" },
+    { code: "PLN", label: "PLN Polish Zloty" },
+    { code: "CZK", label: "CZK Czech Koruna" },
+    { code: "HUF", label: "HUF Hungarian Forint" },
+    { code: "RON", label: "RON Romanian Leu" },
   ];
+
+  const [employmentType, setEmploymentType] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [otherOccupation, setOtherOccupation] = useState("");
   const [incomeCurrency, setIncomeCurrency] = useState("INR");
   const [incomeAmount, setIncomeAmount] = useState("");
   const [company, setCompany] = useState("");
@@ -2173,90 +2822,58 @@ function Work({ onWorkChange }) {
   // 🔹 Sync to parent
   useEffect(() => {
     if (!onWorkChange) return;
-    const incomeText = incomeAmount
-      ? `${incomeCurrency} ${incomeAmount}`
-      : "";
+
+    const finalOccupation =
+      occupation === "Others" ? otherOccupation : occupation;
+
+    const incomeText =
+      employmentType === "Not Working" || !incomeAmount
+        ? ""
+        : `${incomeCurrency} ${incomeAmount}`;
+
     onWorkChange({
-      occupation,
+      employmentType,
+      occupation: finalOccupation,
+      company: employmentType === "Not Working" ? "" : company,
       income: incomeText,
-      company,
+      incomeCurrency,
+      incomeAmount,
     });
-  }, [occupation, incomeCurrency, incomeAmount, company, onWorkChange]);
+  }, [
+    employmentType,
+    occupation,
+    otherOccupation,
+    incomeCurrency,
+    incomeAmount,
+    company,
+    onWorkChange,
+  ]);
+
+  const handleEmploymentChange = (value) => {
+    setEmploymentType(value);
+
+    if (value === "Not Working") {
+      // clear other fields
+      setOccupation("");
+      setOtherOccupation("");
+      setCompany("");
+      setIncomeAmount("");
+    }
+  };
+
+  const showWorkFields =
+    employmentType && employmentType !== "Not Working";
 
   return (
     <Section title="Work Details">
-      {/* OCCUPATION – SEARCHABLE DROPDOWN */}
-      <p className="text-sm font-medium text-gray-700 mb-2">Occupation</p>
-
-      <input
-        className="w-full border rounded-xl p-3"
-        placeholder="Search occupation..."
-        value={occupation || searchOccupation}
-        onChange={(e) => {
-          setOccupation("");
-          setSearchOccupation(e.target.value);
-        }}
-      />
-
-      {!occupation && (
-        <div className="max-h-40 overflow-y-auto mt-2 border rounded-xl bg-white shadow">
-          {occupationList
-            .filter((o) =>
-              o.toLowerCase().includes(searchOccupation.toLowerCase())
-            )
-            .map((o) => (
-              <div
-                key={o}
-                onClick={() => {
-                  setOccupation(o);
-                  setSearchOccupation("");
-                }}
-                className="p-3 cursor-pointer hover:bg-gray-100 text-sm"
-              >
-                {o}
-              </div>
-            ))}
-
-          {occupationList.filter((o) =>
-            o.toLowerCase().includes(searchOccupation.toLowerCase())
-          ).length === 0 && (
-            <div className="p-3 text-gray-500 text-sm">No match found</div>
-          )}
-        </div>
-      )}
-
-      {/* 🔹 MONTHLY INCOME WITH CURRENCY */}
-      <p className="text-sm font-medium text-gray-700 mb-2 mt-4">
-        Monthly Income
-      </p>
-      <div className="flex gap-2 mb-3">
-        <select
-          className="w-40 p-2 border rounded bg-white text-sm"
-          value={incomeCurrency}
-          onChange={(e) => setIncomeCurrency(e.target.value)}
-        >
-          {currencyOptions.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-        <input
-          className="flex-1 p-2 border rounded"
-          placeholder="Amount"
-          value={incomeAmount}
-          onChange={(e) => setIncomeAmount(e.target.value)}
-        />
-      </div>
-
-      {/* EMPLOYMENT TYPE – DROPDOWN (Government / Private) */}
+      {/* 1️⃣ EMPLOYMENT TYPE – FIRST FIELD */}
       <p className="text-sm font-medium text-gray-700 mb-2">
         Employment Type
       </p>
       <select
-        className="w-full p-2 border rounded mb-3 bg-white"
+        className="w-full p-2 border rounded mb-4 bg-white"
         value={employmentType}
-        onChange={(e) => setEmploymentType(e.target.value)}
+        onChange={(e) => handleEmploymentChange(e.target.value)}
       >
         <option value="" disabled>
           Select employment type
@@ -2268,16 +2885,77 @@ function Work({ onWorkChange }) {
         <option value="Not Working">Not Working</option>
       </select>
 
-      {/* COMPANY NAME */}
-      <input
-        className="w-full p-2 border rounded"
-        placeholder="Company Name"
-        value={company}
-        onChange={(e) => setCompany(e.target.value)}
-      />
+      {/* If NOT WORKING → hide everything below */}
+      {showWorkFields && (
+        <>
+          {/* 2️⃣ OCCUPATION – SIMPLE DROPDOWN + OTHERS BOX */}
+          <p className="text-sm font-medium text-gray-700 mb-2">
+            Occupation
+          </p>
+          <select
+            className="w-full p-2 border rounded mb-3 bg-white"
+            value={occupation}
+            onChange={(e) => setOccupation(e.target.value)}
+          >
+            <option value="" disabled>
+              Select occupation
+            </option>
+            {occupationList.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+
+          {occupation === "Others" && (
+            <input
+              className="w-full p-2 border rounded mb-3"
+              placeholder="Type your occupation"
+              value={otherOccupation}
+              onChange={(e) => setOtherOccupation(e.target.value)}
+            />
+          )}
+
+          {/* 3️⃣ COMPANY NAME */}
+          <p className="text-sm font-medium text-gray-700 mb-2">
+            Company Name
+          </p>
+          <input
+            className="w-full p-2 border rounded mb-3"
+            placeholder="Company Name"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+          />
+
+          {/* 4️⃣ MONTHLY INCOME + CURRENCY */}
+          <p className="text-sm font-medium text-gray-700 mb-2">
+            Monthly Income
+          </p>
+          <div className="flex gap-2 mb-3">
+            <select
+              className="w-48 p-2 border rounded bg-white text-sm"
+              value={incomeCurrency}
+              onChange={(e) => setIncomeCurrency(e.target.value)}
+            >
+              {currencyOptions.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <input
+              className="flex-1 p-2 border rounded"
+              placeholder="Amount"
+              value={incomeAmount}
+              onChange={(e) => setIncomeAmount(e.target.value)}
+            />
+          </div>
+        </>
+      )}
     </Section>
   );
 }
+
 
 /* ==== UPDATED FAMILY: controlled + lift to parent ==== */
 function Family({ onFamilyChange }) {
