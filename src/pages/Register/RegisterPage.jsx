@@ -3365,10 +3365,11 @@ function SiblingDetails() {
       </p>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* BROTHERS MARRIED */}
+
+        {/* ELDER BROTHER */}
         <div>
           <label className="text-sm font-medium text-gray-700">
-            Brothers (Married)
+            Elder Brothers (Married)
           </label>
           <input
             type="number"
@@ -3378,10 +3379,9 @@ function SiblingDetails() {
           />
         </div>
 
-        {/* BROTHERS UNMARRIED */}
         <div>
           <label className="text-sm font-medium text-gray-700">
-            Brothers (Unmarried)
+            Elder Brothers (Unmarried)
           </label>
           <input
             type="number"
@@ -3391,10 +3391,10 @@ function SiblingDetails() {
           />
         </div>
 
-        {/* SISTERS MARRIED */}
+        {/* YOUNGER BROTHER */}
         <div>
           <label className="text-sm font-medium text-gray-700">
-            Sisters (Married)
+            Younger Brothers (Married)
           </label>
           <input
             type="number"
@@ -3404,10 +3404,9 @@ function SiblingDetails() {
           />
         </div>
 
-        {/* SISTERS UNMARRIED */}
         <div>
           <label className="text-sm font-medium text-gray-700">
-            Sisters (Unmarried)
+            Younger Brothers (Unmarried)
           </label>
           <input
             type="number"
@@ -3416,10 +3415,62 @@ function SiblingDetails() {
             placeholder="0"
           />
         </div>
+
+        {/* ELDER SISTER */}
+        <div>
+          <label className="text-sm font-medium text-gray-700">
+            Elder Sisters (Married)
+          </label>
+          <input
+            type="number"
+            min="0"
+            className="mt-1 w-full p-2 border rounded-lg"
+            placeholder="0"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700">
+            Elder Sisters (Unmarried)
+          </label>
+          <input
+            type="number"
+            min="0"
+            className="mt-1 w-full p-2 border rounded-lg"
+            placeholder="0"
+          />
+        </div>
+
+        {/* YOUNGER SISTER */}
+        <div>
+          <label className="text-sm font-medium text-gray-700">
+            Younger Sisters (Married)
+          </label>
+          <input
+            type="number"
+            min="0"
+            className="mt-1 w-full p-2 border rounded-lg"
+            placeholder="0"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700">
+            Younger Sisters (Unmarried)
+          </label>
+          <input
+            type="number"
+            min="0"
+            className="mt-1 w-full p-2 border rounded-lg"
+            placeholder="0"
+          />
+        </div>
+
       </div>
     </Section>
   );
 }
+
 
 /* ==== UPDATED PARTNER DETAILS USING country-state-city ==== */
 
